@@ -11,166 +11,171 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         :root { --primary: #4f46e5; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .tab-active { color: var(--primary); font-weight: 800; position: relative; }
         .tab-active::after { content: ''; position: absolute; bottom: 0; left: 25%; width: 50%; height: 3px; background: var(--primary); border-radius: 10px; }
-        .card-premium { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); }
+        .card-premium { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .modal-animate { animation: modalSlideUp 0.3s ease-out; }
         @keyframes modalSlideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .chart-container { position: relative; height: 240px; width: 100%; }
+        .chart-container { position: relative; height: 220px; width: 100%; }
     </style>
 </head>
 <body class="pb-28">
 
-    <!-- Header RAFAH SUKSES -->
+    <!-- Header Brand RAFAH SUKSES -->
     <header class="sticky top-0 z-50 glass border-b border-slate-200/50 px-5 py-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
                 <span class="text-white font-black text-sm">RS</span>
             </div>
             <div>
                 <h1 class="text-base font-black tracking-tight text-slate-900 leading-none uppercase">RAFAH SUKSES</h1>
-                <p class="text-[9px] font-bold text-indigo-500 tracking-[0.2em] uppercase mt-1 italic">Professional Konter Dashboard</p>
+                <p class="text-[9px] font-bold text-indigo-500 tracking-[0.2em] uppercase mt-1 italic">Financial Konter Smart System</p>
             </div>
         </div>
-        <button id="ai-analyze-btn" class="bg-indigo-50 p-2 rounded-full border border-indigo-100">
+        <button id="ai-analyze-btn" class="bg-white p-2 rounded-full border border-slate-200 shadow-sm active:scale-95 transition-transform">
             <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
         </button>
     </header>
 
     <main class="p-5 space-y-6">
         
-        <!-- Summary Cards: Logika Kas Terpadu -->
-        <div class="card-premium p-6 rounded-[32px] shadow-2xl shadow-indigo-900/20 text-white relative overflow-hidden">
+        <!-- Premium Wallet Card -->
+        <div class="card-premium p-6 rounded-[32px] shadow-2xl shadow-slate-900/20 text-white relative overflow-hidden">
+            <div class="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/5 rounded-full"></div>
             <div class="relative z-10">
                 <div class="flex justify-between items-start mb-4">
                     <div>
-                        <p class="text-[10px] font-bold text-indigo-200 uppercase tracking-widest mb-1">Sisa Saldo Kas (Real-time)</p>
-                        <h2 id="sisa-kas" class="text-3xl font-black">Rp 0</h2>
-                        <p class="text-[9px] text-indigo-300 italic mt-1">*Uang tunai + Modal kembali</p>
+                        <p class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-1">Total Sisa Saldo Kas</p>
+                        <h2 id="sisa-kas" class="text-3xl font-black tracking-tight">Rp 0</h2>
+                        <p class="text-[9px] text-indigo-400 font-medium mt-1">Sesuai rumus: (Modal + Jual) - Keluar</p>
                     </div>
-                    <div class="p-2 bg-white/10 rounded-lg"><i data-lucide="landmark" class="w-5 h-5 text-indigo-200"></i></div>
+                    <div class="p-2 bg-white/10 rounded-lg">
+                        <i data-lucide="wallet" class="w-5 h-5 text-indigo-300"></i>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
                     <div>
-                        <p class="text-[9px] text-indigo-200 uppercase font-bold mb-1 italic">Total Modal Masuk</p>
+                        <p class="text-[9px] text-slate-400 uppercase font-bold mb-1 italic">Modal Investor</p>
                         <p id="total-invest" class="text-sm font-bold text-white">Rp 0</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-[9px] text-indigo-200 uppercase font-bold mb-1 italic">Laba Bersih Filtered</p>
-                        <p id="laba-bersih-summary" class="text-sm font-bold text-emerald-400">Rp 0</p>
+                        <p class="text-[9px] text-slate-400 uppercase font-bold mb-1 italic">Total Penjualan</p>
+                        <p id="total-omzet-global" class="text-sm font-bold text-indigo-300">Rp 0</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Smart Filter -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+        <!-- Date Filter Container -->
+        <div class="bg-white/70 backdrop-blur-md p-4 rounded-2xl border border-white shadow-sm space-y-3">
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                    <i data-lucide="filter" class="w-3"></i> Rentang Laporan
+                    <i data-lucide="calendar-range" class="w-3"></i> Periode Laporan
                 </span>
-                <button onclick="resetFilter()" class="text-[10px] font-bold text-indigo-600">RESET</button>
+                <button onclick="resetFilter()" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">RESET</button>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                <input type="date" id="filter-start" onchange="refreshUI()" class="text-[11px] font-bold p-2.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500">
-                <input type="date" id="filter-end" onchange="refreshUI()" class="text-[11px] font-bold p-2.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500">
+                <input type="date" id="filter-start" onchange="refreshUI()" class="w-full text-[11px] font-bold p-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500">
+                <input type="date" id="filter-end" onchange="refreshUI()" class="w-full text-[11px] font-bold p-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500">
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
+        <!-- Main Tab Navigation -->
         <div class="flex overflow-x-auto space-x-7 border-b border-slate-200 no-scrollbar px-2">
-            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="pb-3 text-xs whitespace-nowrap tab-active">Analisis</button>
-            <button onclick="switchTab('transaksi')" id="tab-transaksi" class="pb-3 text-xs whitespace-nowrap text-slate-400 font-bold">Penjualan</button>
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="pb-3 text-xs whitespace-nowrap tab-active">Ringkasan</button>
+            <button onclick="switchTab('transaksi')" id="tab-transaksi" class="pb-3 text-xs whitespace-nowrap text-slate-400 font-bold">Data Jual</button>
             <button onclick="switchTab('pengeluaran')" id="tab-pengeluaran" class="pb-3 text-xs whitespace-nowrap text-slate-400 font-bold">Uang Keluar</button>
             <button onclick="switchTab('kalender')" id="tab-kalender" class="pb-3 text-xs whitespace-nowrap text-slate-400 font-bold">Kalender</button>
             <button onclick="switchTab('modal')" id="tab-modal" class="pb-3 text-xs whitespace-nowrap text-slate-400 font-bold">Investor</button>
         </div>
 
-        <!-- Section: Dashboard -->
+        <!-- Content Area: Dashboard -->
         <div id="section-dashboard" class="space-y-6">
             
-            <!-- Revenue Share Card -->
+            <!-- Revenue Share Analytics -->
             <div class="bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm">
-                <div class="flex items-center gap-2 mb-5">
-                    <div class="p-2 bg-amber-50 rounded-xl"><i data-lucide="calculator" class="w-4 h-4 text-amber-600"></i></div>
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-2 bg-indigo-50 rounded-xl"><i data-lucide="trending-up" class="w-4 h-4 text-indigo-600"></i></div>
                     <div>
-                        <h3 class="text-sm font-black text-slate-800">Bagi Hasil RAFAH</h3>
-                        <p class="text-[10px] text-slate-400 font-bold">Porsi 45% Investor : 55% Anda</p>
+                        <h3 class="text-sm font-black text-slate-800">Analisis Bagi Hasil</h3>
+                        <p class="text-[10px] text-slate-400 font-bold">Periode Terpilih (45:55)</p>
                     </div>
                 </div>
                 <div class="space-y-4">
-                    <div class="flex justify-between items-end border-b border-slate-50 pb-3">
+                    <div class="flex justify-between items-end border-b border-slate-50 pb-4">
                         <span class="text-xs font-bold text-slate-400 italic">Total Laba Bersih</span>
-                        <span id="laba-bersih" class="text-xl font-black text-slate-900">Rp 0</span>
+                        <span id="laba-bersih" class="text-2xl font-black text-slate-900">Rp 0</span>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 text-center">
+                        <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100/50">
                             <p class="text-[9px] font-black text-indigo-400 uppercase mb-2">Investor (45%)</p>
-                            <p id="share-investor" class="text-sm font-black text-indigo-600">Rp 0</p>
+                            <p id="share-investor" class="text-sm font-black text-indigo-700">Rp 0</p>
                         </div>
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                             <p class="text-[9px] font-black text-slate-400 uppercase mb-2">Anda (55%)</p>
-                            <p id="share-pengelola" class="text-sm font-black text-slate-900">Rp 0</p>
+                            <p id="share-pengelola" class="text-sm font-black text-slate-800">Rp 0</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Graphs -->
+            <!-- Charts Container -->
             <div class="bg-white p-5 rounded-[28px] shadow-sm border border-slate-100">
-                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 italic">Statistik Penjualan</h3>
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Tren Omzet Periode Ini</h3>
                 <div class="chart-container"><canvas id="lineChart"></canvas></div>
             </div>
 
             <div class="grid grid-cols-1 gap-6">
                 <div class="bg-white p-5 rounded-[28px] shadow-sm border border-slate-100">
-                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 italic">Produk Terlaris (Frekuensi)</h3>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Produk Terlaris</h3>
                     <div class="chart-container"><canvas id="barChart"></canvas></div>
                 </div>
                 <div class="bg-white p-5 rounded-[28px] shadow-sm border border-slate-100">
-                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 italic">Komposisi Keuntungan</h3>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Distribusi Laba</h3>
                     <div class="chart-container"><canvas id="pieChart"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <!-- Section: Transaksi -->
+        <!-- Content Area: List View Transaksi -->
         <div id="section-transaksi" class="hidden space-y-4">
             <div id="transaksi-list" class="space-y-3"></div>
         </div>
 
-        <!-- Section: Pengeluaran -->
+        <!-- Content Area: List View Pengeluaran -->
         <div id="section-pengeluaran" class="hidden space-y-4">
             <div id="expense-list" class="space-y-3"></div>
         </div>
 
-        <!-- Section: Kalender -->
+        <!-- Content Area: Full Calendar -->
         <div id="section-kalender" class="hidden">
-            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="bg-white p-4 rounded-[32px] shadow-sm border border-slate-100">
                 <div id="calendar"></div>
             </div>
         </div>
 
-        <!-- Section: Investor -->
+        <!-- Content Area: Modal History -->
         <div id="section-modal" class="hidden space-y-4">
             <div id="modal-investor-list" class="space-y-4"></div>
         </div>
 
     </main>
 
-    <!-- Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-slate-200/50 px-8 py-4 flex justify-between items-center z-50 rounded-t-[32px] shadow-xl">
+    <!-- Floating Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-slate-200/50 px-8 py-5 flex justify-between items-center z-50 rounded-t-[40px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center gap-1.5 text-indigo-600">
-            <i data-lucide="layout-grid" class="w-6 h-6"></i>
-            <span class="text-[9px] font-black uppercase tracking-tighter">Beranda</span>
+            <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+            <span class="text-[9px] font-black uppercase tracking-tighter">Analisis</span>
         </button>
-        <div class="relative -mt-16">
-            <button onclick="toggleQuickMenu()" class="w-16 h-16 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-300 border-4 border-white flex items-center justify-center active:scale-95 transition-transform">
+        
+        <div class="relative -mt-20">
+            <button onclick="toggleQuickMenu()" class="w-16 h-16 bg-indigo-600 rounded-[22px] shadow-2xl shadow-indigo-300 border-[6px] border-white flex items-center justify-center active:scale-90 transition-transform">
                 <i data-lucide="plus" class="text-white w-8 h-8"></i>
             </button>
+            <!-- Popover Menu -->
             <div id="quick-menu" class="hidden absolute bottom-24 left-1/2 -translate-x-1/2 w-48 space-y-2 modal-animate">
                 <button onclick="openModal('modal-transaksi'); toggleQuickMenu()" class="w-full bg-white border border-slate-100 p-4 rounded-2xl text-xs font-black text-slate-700 shadow-2xl flex items-center gap-3">
                     <div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center"><i data-lucide="shopping-cart" class="w-4 h-4"></i></div>
@@ -182,33 +187,34 @@
                 </button>
             </div>
         </div>
+
         <button onclick="switchTab('modal')" id="nav-modal" class="flex flex-col items-center gap-1.5 text-slate-400">
             <i data-lucide="users" class="w-6 h-6"></i>
             <span class="text-[9px] font-black uppercase tracking-tighter">Investor</span>
         </button>
     </nav>
 
-    <!-- Modal Base Container -->
-    <div id="modal-container" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[60] flex items-end sm:items-center justify-center">
-        <div id="modal-content" class="bg-white w-full max-w-md rounded-t-[40px] sm:rounded-[40px] p-8 modal-animate shadow-2xl"></div>
+    <!-- Modal System -->
+    <div id="modal-container" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden z-[60] flex items-end sm:items-center justify-center">
+        <div id="modal-content" class="bg-white w-full max-w-md rounded-t-[44px] sm:rounded-[44px] p-8 modal-animate shadow-2xl"></div>
     </div>
 
-    <!-- AI Overlay -->
-    <div id="ai-panel" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md hidden z-[70] flex items-end">
-        <div class="bg-white w-full rounded-t-[40px] p-8 max-h-[90vh] overflow-y-auto modal-animate">
+    <!-- RAFAH SUKSES AI Overlay -->
+    <div id="ai-panel" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden z-[70] flex items-end">
+        <div class="bg-white w-full rounded-t-[44px] p-10 max-h-[92vh] overflow-y-auto modal-animate">
             <div class="flex justify-between items-center mb-8 sticky top-0 bg-white pb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center"><i data-lucide="sparkles" class="text-white w-5 h-5"></i></div>
-                    <h2 class="text-xl font-black text-slate-900 italic">RAFAH AI ANALYST</h2>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="sparkles" class="text-white w-6 h-6"></i></div>
+                    <h2 class="text-xl font-black text-slate-900 italic uppercase tracking-tighter">Rafah Sukses AI</h2>
                 </div>
-                <button onclick="closeModal('ai-panel')" class="bg-slate-100 p-2 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="closeModal('ai-panel')" class="bg-slate-100 p-3 rounded-full"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
             </div>
-            <div id="ai-content" class="text-sm space-y-4 leading-relaxed font-medium text-slate-600"></div>
+            <div id="ai-content" class="text-sm space-y-5 leading-relaxed font-medium text-slate-600"></div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbySwelg-1anKonhF2SkghQrRp1X84AVNGqJJqrl6YsKkOwAvArhppb5ssPPw3FqUvmp8g/exec"; 
+        const API_URL = "https://script.google.com/macros/s/AKfycbySwelg-1anKonhF2SkghQrRp1X84AVNGqJJqrl6YsKkOwAvArhppb5ssPPw3FqUvmp8g/exec"; // API URL Anda
         const apiKey = ""; 
 
         let appData = { transaksi: [], modal: [], pengeluaran: [] };
@@ -234,14 +240,14 @@
         }
 
         function mockData() {
-            const t = new Date().toISOString().split('T')[0];
+            const today = new Date().toISOString().split('T')[0];
             appData = {
                 transaksi: [
-                    { Tanggal: t, Kategori: 'Pulsa', "Nama Barang": 'Tsel 10k', Laba: 2000, "Harga Jual": 12000, Modal: 10000 },
-                    { Tanggal: t, Kategori: 'Aksesoris', "Nama Barang": 'Case iPhone', Laba: 25000, "Harga Jual": 50000, Modal: 25000 }
+                    { Tanggal: today, Kategori: 'Pulsa', "Nama Barang": 'Tsel 10k', Laba: 2000, "Harga Jual": 12000, Modal: 10000 },
+                    { Tanggal: today, Kategori: 'Aksesoris', "Nama Barang": 'Charger Ori', Laba: 45000, "Harga Jual": 125000, Modal: 80000 }
                 ],
-                modal: [{ Tanggal: t, Sumber: 'Investor Utama', Jumlah: 10000000, Alokasi: 'Modal Kerja' }],
-                pengeluaran: [{ Tanggal: t, Kategori: 'Stok Barang', Jumlah: 500000, Keterangan: 'Kulakan perdana' }]
+                modal: [{ Tanggal: today, Sumber: 'Investor Utama', Jumlah: 5000000, Alokasi: 'Stok Toko' }],
+                pengeluaran: [{ Tanggal: today, Kategori: 'Stok Barang', Jumlah: 1500000, Keterangan: 'Belanja perdana' }]
             };
         }
 
@@ -262,22 +268,23 @@
         function refreshUI() {
             const data = getFilteredData();
             
-            // Logika Keuangan Terpadu
+            // Logika Kas Global (Real-time di tangan)
             const totalGlobalInvest = appData.modal.reduce((a, b) => a + Number(b.Jumlah || 0), 0);
             const totalGlobalSales = appData.transaksi.reduce((a, b) => a + Number(b['Harga Jual'] || 0), 0);
             const totalGlobalExp = appData.pengeluaran.reduce((a, b) => a + Number(b.Jumlah || 0), 0);
             
-            // Sisa Kas: Uang yang benar-benar ada di tangan (Modal + Hasil Jual - Semua Pengeluaran)
+            // Rumus: (Modal + Jual) - Keluar
             const sisaKas = (totalGlobalInvest + totalGlobalSales) - totalGlobalExp;
 
-            // Stats berdasar Filter
+            // Stats Filtered (Dasar Bagi Hasil)
             const labaKotor = data.transaksi.reduce((a, b) => a + Number(b.Laba || 0), 0);
             const expFilter = data.pengeluaran.reduce((a, b) => a + Number(b.Jumlah || 0), 0);
             const labaBersih = labaKotor - expFilter;
 
+            // Update UI
             document.getElementById('sisa-kas').innerText = formatIDR(sisaKas);
             document.getElementById('total-invest').innerText = formatIDR(totalGlobalInvest);
-            document.getElementById('laba-bersih-summary').innerText = formatIDR(labaBersih);
+            document.getElementById('total-omzet-global').innerText = formatIDR(totalGlobalSales);
             document.getElementById('laba-bersih').innerText = formatIDR(labaBersih);
             document.getElementById('share-investor').innerText = formatIDR(labaBersih > 0 ? labaBersih * 0.45 : 0);
             document.getElementById('share-pengelola').innerText = formatIDR(labaBersih > 0 ? labaBersih * 0.55 : 0);
@@ -299,7 +306,7 @@
             if(charts.line) charts.line.destroy();
             charts.line = new Chart(document.getElementById('lineChart'), {
                 type: 'line',
-                data: { labels, datasets: [{ data: omzet, borderColor: '#4f46e5', borderWidth: 4, pointRadius: 0, tension: 0.4, fill: true, backgroundColor: 'rgba(79, 70, 229, 0.05)' }] },
+                data: { labels, datasets: [{ data: omzet, borderColor: '#4f46e5', borderWidth: 4, pointRadius: 4, pointBackgroundColor: '#fff', tension: 0.4, fill: true, backgroundColor: 'rgba(79, 70, 229, 0.05)' }] },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
             });
 
@@ -309,7 +316,7 @@
             charts.pie = new Chart(document.getElementById('pieChart'), {
                 type: 'doughnut',
                 data: { labels: Object.keys(catProfit), datasets: [{ data: Object.values(catProfit), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 10, weight: '800' } } } } }
+                options: { maintainAspectRatio: false, cutout: '80%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: '800' } } } } }
             });
 
             const freq = {};
@@ -317,25 +324,25 @@
             if(charts.bar) charts.bar.destroy();
             charts.bar = new Chart(document.getElementById('barChart'), {
                 type: 'bar',
-                data: { labels: Object.keys(freq), datasets: [{ data: Object.values(freq), backgroundColor: '#1e1b4b', borderRadius: 8 }] },
+                data: { labels: Object.keys(freq), datasets: [{ data: Object.values(freq), backgroundColor: '#1e1b4b', borderRadius: 10 }] },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
             });
         }
 
         function renderTransactions(data) {
             const list = document.getElementById('transaksi-list');
-            list.innerHTML = data.transaksi.length ? '' : '<p class="text-center py-10 text-slate-300 font-bold uppercase text-[10px]">Belum Ada Penjualan</p>';
+            list.innerHTML = data.transaksi.length ? '' : '<p class="text-center py-20 text-slate-300 font-bold uppercase text-[10px] tracking-widest">Tidak ada data jual</p>';
             data.transaksi.slice().reverse().forEach(t => {
                 list.innerHTML += `
-                    <div class="bg-white p-5 rounded-[24px] border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div class="bg-white p-5 rounded-[28px] border border-slate-100 flex justify-between items-center shadow-sm">
                         <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-black text-xs">${t.Kategori[0]}</div>
+                            <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-indigo-600 font-black text-xs border border-slate-100">${t.Kategori[0]}</div>
                             <div>
                                 <p class="font-black text-sm text-slate-900">${t['Nama Barang']}</p>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase">${t.Kategori} • ${new Date(t.Tanggal).toLocaleDateString()}</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${t.Kategori} • ${new Date(t.Tanggal).toLocaleDateString()}</p>
                             </div>
                         </div>
-                        <p class="text-emerald-600 font-black text-sm">+${formatIDR(t.Laba)}</p>
+                        <p class="text-emerald-600 font-black text-sm tracking-tighter">+${formatIDR(t.Laba)}</p>
                     </div>
                 `;
             });
@@ -344,13 +351,13 @@
 
         function renderExpenses(data) {
             const list = document.getElementById('expense-list');
-            list.innerHTML = data.pengeluaran.length ? '' : '<p class="text-center py-10 text-slate-300">Kosong</p>';
+            list.innerHTML = data.pengeluaran.length ? '' : '<p class="text-center py-20 text-slate-300 font-bold">Data Kosong</p>';
             data.pengeluaran.slice().reverse().forEach(e => {
                 list.innerHTML += `
-                    <div class="bg-white p-5 rounded-[24px] border-l-8 border-rose-500 flex justify-between items-center shadow-sm">
+                    <div class="bg-white p-5 rounded-[28px] border-l-[10px] border-rose-500 flex justify-between items-center shadow-sm">
                         <div>
                             <p class="font-black text-sm text-slate-900">${e.Kategori}</p>
-                            <p class="text-[10px] text-slate-400 font-bold">${e.Keterangan || '-'} • ${new Date(e.Tanggal).toLocaleDateString()}</p>
+                            <p class="text-[10px] text-slate-400 font-bold">${e.Keterangan || 'Operasional'} • ${new Date(e.Tanggal).toLocaleDateString()}</p>
                         </div>
                         <p class="text-rose-500 font-black text-sm">-${formatIDR(e.Jumlah)}</p>
                     </div>
@@ -363,13 +370,16 @@
             list.innerHTML = '';
             appData.modal.forEach(m => {
                 list.innerHTML += `
-                    <div class="bg-indigo-900 p-6 rounded-[32px] text-white shadow-xl relative overflow-hidden">
-                        <p class="text-[9px] font-black uppercase tracking-widest text-indigo-300 mb-4 italic">Dana Investasi RAFAH</p>
-                        <div class="flex justify-between items-center mb-2">
-                            <h4 class="font-black text-lg italic tracking-tighter">${m.Sumber}</h4>
-                            <p class="text-2xl font-black text-white">${formatIDR(m.Jumlah)}</p>
+                    <div class="bg-slate-900 p-7 rounded-[36px] text-white shadow-2xl relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <p class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400 italic mb-2">Investor Agreement</p>
+                                <h4 class="font-black text-xl italic tracking-tighter uppercase">${m.Sumber}</h4>
+                            </div>
+                            <span class="text-[10px] bg-white/10 px-3 py-1 rounded-full border border-white/10">DANA MASUK</span>
                         </div>
-                        <p class="text-xs text-indigo-200 opacity-70">${m.Alokasi}</p>
+                        <p class="text-3xl font-black text-white mb-3">${formatIDR(m.Jumlah)}</p>
+                        <p class="text-xs text-slate-400 font-medium leading-relaxed italic border-t border-white/5 pt-3">${m.Alokasi}</p>
                     </div>
                 `;
             });
@@ -392,34 +402,34 @@
             let html = '';
             if (type === 'modal-transaksi') {
                 html = `
-                    <h2 class="text-xl font-black text-slate-900 italic mb-6 uppercase">Input Penjualan</h2>
-                    <form id="form-transaksi" class="space-y-4">
-                        <input type="text" name="nama" placeholder="NAMA BARANG / JASA" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
-                        <select name="kategori" onchange="checkKategoriLainnya(this)" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold">
+                    <h2 class="text-2xl font-black text-slate-900 italic mb-8 uppercase tracking-tighter">Input Penjualan Baru</h2>
+                    <form id="form-transaksi" class="space-y-5">
+                        <input type="text" name="nama" placeholder="NAMA PRODUK / JASA" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold uppercase" required>
+                        <select name="kategori" onchange="checkKategoriLainnya(this)" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold">
                             <option>Pulsa</option><option>Paket Data</option><option>Aksesoris</option><option>Service</option><option value="Lainnya">Lainnya...</option>
                         </select>
-                        <div id="input-kategori-manual" class="hidden"><input type="text" id="kategori-manual" placeholder="Ketik Kategori Baru..." class="w-full p-4 bg-indigo-50 border border-indigo-100 rounded-2xl text-sm font-bold"></div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <input type="number" name="modal" placeholder="MODAL (Rp)" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
-                            <input type="number" name="jual" placeholder="JUAL (Rp)" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
+                        <div id="input-kategori-manual" class="hidden"><input type="text" id="kategori-manual" placeholder="Sebutkan Kategori Baru..." class="w-full p-5 bg-indigo-50 border border-indigo-100 rounded-2xl text-sm font-bold"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" name="modal" placeholder="MODAL (Rp)" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
+                            <input type="number" name="jual" placeholder="JUAL (Rp)" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
                         </div>
-                        <button type="submit" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black tracking-widest uppercase text-xs shadow-xl active:scale-95 transition-transform">Simpan Data</button>
+                        <button type="submit" class="w-full bg-indigo-600 text-white py-6 rounded-[24px] font-black tracking-[0.2em] uppercase text-xs shadow-xl active:scale-95 transition-transform mt-6">Simpan Transaksi</button>
                     </form>
                 `;
             } else if (type === 'modal-expense') {
                 html = `
-                    <h2 class="text-xl font-black text-slate-900 italic mb-6 uppercase">Input Uang Keluar</h2>
-                    <form id="form-expense" class="space-y-4">
-                        <select name="kategori" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold">
-                            <option>Stok Barang</option><option>Operasional</option><option>Sewa</option><option>Lain-lain</option>
+                    <h2 class="text-2xl font-black text-slate-900 italic mb-8 uppercase tracking-tighter">Input Uang Keluar</h2>
+                    <form id="form-expense" class="space-y-5">
+                        <select name="kategori" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold">
+                            <option>Stok Barang</option><option>Biaya Listrik</option><option>Sewa Tempat</option><option>Lain-lain</option>
                         </select>
-                        <input type="number" name="jumlah" placeholder="NOMINAL (Rp)" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
-                        <textarea name="ket" placeholder="KETERANGAN..." class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold h-24"></textarea>
-                        <button type="submit" class="w-full bg-rose-500 text-white py-5 rounded-2xl font-black tracking-widest uppercase text-xs shadow-xl active:scale-95 transition-transform">Catat Pengeluaran</button>
+                        <input type="number" name="jumlah" placeholder="NOMINAL (Rp)" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
+                        <textarea name="ket" placeholder="KETERANGAN..." class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold h-28 uppercase"></textarea>
+                        <button type="submit" class="w-full bg-rose-600 text-white py-6 rounded-[24px] font-black tracking-[0.2em] uppercase text-xs shadow-xl active:scale-95 transition-transform mt-6">Catat Keluar</button>
                     </form>
                 `;
             }
-            content.innerHTML = html + `<button onclick="closeModal('modal-container')" class="w-full mt-4 text-[10px] font-bold text-slate-300 uppercase">Tutup</button>`;
+            content.innerHTML = html + `<button onclick="closeModal('modal-container')" class="w-full mt-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">Tutup Jendela</button>`;
             
             const transForm = document.getElementById('form-transaksi');
             if(transForm) transForm.onsubmit = async (e) => {
@@ -454,18 +464,18 @@
 
         document.getElementById('ai-analyze-btn').onclick = async () => {
             const p = document.getElementById('ai-panel'); p.classList.remove('hidden');
-            const c = document.getElementById('ai-content'); c.innerHTML = "Menganalisis performa RAFAH SUKSES...";
+            const c = document.getElementById('ai-content'); c.innerHTML = "Menganalisis performa bisnis RAFAH SUKSES...";
             const data = getFilteredData();
             const laba = data.transaksi.reduce((a,b)=>a+Number(b.Laba),0);
-            const prompt = `Analisis performa konter RAFAH SUKSES. Laba saat ini: ${formatIDR(laba)}. Berikan strategi promosi singkat untuk besok pagi agar omzet naik. Gunakan bahasa Indonesia yang memotivasi.`;
+            const prompt = `Analisis performa konter RAFAH SUKSES. Laba saat ini: ${formatIDR(laba)}. Berikan 3 poin strategi promosi singkat agar omzet naik signifikan besok pagi. Gunakan Bahasa Indonesia yang sangat profesional dan memotivasi pengelola.`;
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
                 const r = await res.json();
-                c.innerHTML = (r.candidates?.[0]?.content?.parts?.[0]?.text || "Koneksi asisten terputus.").replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-900">$1</b>');
-            } catch (e) { c.innerHTML = "Gagal memuat analisis."; }
+                c.innerHTML = (r.candidates?.[0]?.content?.parts?.[0]?.text || "Layanan AI sibuk.").replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-900 font-black">$1</b>');
+            } catch (e) { c.innerHTML = "Gagal memuat analisis AI."; }
         };
 
         function initCalendar() {
@@ -478,7 +488,7 @@
 
         function updateCalendar() {
             const ev = [...appData.transaksi.map(t => ({ title: `+${formatIDR(t.Laba)}`, start: t.Tanggal, color: '#10b981' })),
-                        ...appData.pengeluaran.map(e => ({ title: `-${formatIDR(e.Jumlah)}`, start: e.Tanggal, color: '#ef4444' }))];
+                        ...appData.pengeluaran.map(e => ({ title: `-${formatIDR(e.jumlah)}`, start: e.Tanggal, color: '#ef4444' }))];
             calendar.removeAllEvents(); calendar.addEventSource(ev);
         }
     </script>
