@@ -95,13 +95,13 @@
         <!-- Content Area: Dashboard -->
         <div id="section-dashboard" class="space-y-6">
             
-            <!-- Revenue Share Analytics -->
+            <!-- Revenue Share Analytics (LAMA) -->
             <div class="bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm">
                 <div class="flex items-center gap-2 mb-6">
                     <div class="p-2 bg-indigo-50 rounded-xl"><i data-lucide="trending-up" class="w-4 h-4 text-indigo-600"></i></div>
                     <div>
-                        <h3 class="text-sm font-black text-slate-800">Analisis Bagi Hasil</h3>
-                        <p class="text-[10px] text-slate-400 font-bold">Periode Terpilih (45:55)</p>
+                        <h3 class="text-sm font-black text-slate-800">Analisis Bagi Hasil (Bersih)</h3>
+                        <p class="text-[10px] text-slate-400 font-bold italic">Sudah Dikurangi Pengeluaran (45:55)</p>
                     </div>
                 </div>
                 <div class="space-y-4">
@@ -117,6 +117,33 @@
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                             <p class="text-[9px] font-black text-slate-400 uppercase mb-2">Anda (55%)</p>
                             <p id="share-pengelola" class="text-sm font-black text-slate-800">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Share Analytics (BARU - TANPA PENGELUARAN) -->
+            <div class="bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm border-t-4 border-t-emerald-500">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-2 bg-emerald-50 rounded-xl"><i data-lucide="piggy-bank" class="w-4 h-4 text-emerald-600"></i></div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 text-emerald-700">Profit Penjualan</h3>
+                        <p class="text-[10px] text-slate-400 font-bold italic">Tanpa Potong Pengeluaran (45:55)</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end border-b border-slate-50 pb-4">
+                        <span class="text-xs font-bold text-slate-400 italic">Total Laba Kotor</span>
+                        <span id="laba-kotor-only" class="text-2xl font-black text-emerald-600">Rp 0</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+                            <p class="text-[9px] font-black text-emerald-500 uppercase mb-2">Investor (45%)</p>
+                            <p id="share-investor-gross" class="text-sm font-black text-emerald-700">Rp 0</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-[9px] font-black text-slate-400 uppercase mb-2">Anda (55%)</p>
+                            <p id="share-pengelola-gross" class="text-sm font-black text-slate-800">Rp 0</p>
                         </div>
                     </div>
                 </div>
@@ -214,7 +241,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbySwelg-1anKonhF2SkghQrRp1X84AVNGqJJqrl6YsKkOwAvArhppb5ssPPw3FqUvmp8g/exec"; // API URL Anda
+        const API_URL = "https://script.google.com/macros/s/AKfycbySwelg-1anKonhF2SkghQrRp1X84AVNGqJJqrl6YsKkOwAvArhppb5ssPPw3FqUvmp8g/exec"; 
         const apiKey = ""; 
 
         let appData = { transaksi: [], modal: [], pengeluaran: [] };
@@ -281,13 +308,18 @@
             const expFilter = data.pengeluaran.reduce((a, b) => a + Number(b.Jumlah || 0), 0);
             const labaBersih = labaKotor - expFilter;
 
-            // Update UI
+            // Update UI - Analisis Bagi Hasil LAMA (Bersih)
             document.getElementById('sisa-kas').innerText = formatIDR(sisaKas);
             document.getElementById('total-invest').innerText = formatIDR(totalGlobalInvest);
             document.getElementById('total-omzet-global').innerText = formatIDR(totalGlobalSales);
             document.getElementById('laba-bersih').innerText = formatIDR(labaBersih);
             document.getElementById('share-investor').innerText = formatIDR(labaBersih > 0 ? labaBersih * 0.45 : 0);
             document.getElementById('share-pengelola').innerText = formatIDR(labaBersih > 0 ? labaBersih * 0.55 : 0);
+
+            // Update UI - Analisis Profit BARU (Tanpa Pengeluaran)
+            document.getElementById('laba-kotor-only').innerText = formatIDR(labaKotor);
+            document.getElementById('share-investor-gross').innerText = formatIDR(labaKotor > 0 ? labaKotor * 0.45 : 0);
+            document.getElementById('share-pengelola-gross').innerText = formatIDR(labaKotor > 0 ? labaKotor * 0.55 : 0);
 
             renderCharts(data);
             renderTransactions(data);
