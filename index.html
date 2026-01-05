@@ -20,6 +20,9 @@
         .modal-animate { animation: modalSlideUp 0.3s ease-out; }
         @keyframes modalSlideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .chart-container { position: relative; height: 220px; width: 100%; }
+        /* Loading Spinner */
+        .loader { border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #4f46e5; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="pb-28">
@@ -75,7 +78,10 @@
                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                     <i data-lucide="calendar-range" class="w-3"></i> Periode Laporan
                 </span>
-                <button onclick="resetFilter()" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">RESET</button>
+                <div class="flex items-center gap-2">
+                    <span id="sync-status" class="text-[9px] font-bold text-emerald-600 hidden">Tersimpan</span>
+                    <button onclick="resetFilter()" class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">RESET</button>
+                </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <input type="date" id="filter-start" onchange="refreshUI()" class="w-full text-[11px] font-bold p-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500">
@@ -95,33 +101,6 @@
         <!-- Content Area: Dashboard -->
         <div id="section-dashboard" class="space-y-6">
             
-            <!-- Revenue Share Analytics (LAMA) -->
-            <div class="bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="p-2 bg-indigo-50 rounded-xl"><i data-lucide="trending-up" class="w-4 h-4 text-indigo-600"></i></div>
-                    <div>
-                        <h3 class="text-sm font-black text-slate-800">Analisis Bagi Hasil (Bersih)</h3>
-                        <p class="text-[10px] text-slate-400 font-bold italic">Sudah Dikurangi Pengeluaran (45:55)</p>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-end border-b border-slate-50 pb-4">
-                        <span class="text-xs font-bold text-slate-400 italic">Total Laba Bersih</span>
-                        <span id="laba-bersih" class="text-2xl font-black text-slate-900">Rp 0</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100/50">
-                            <p class="text-[9px] font-black text-indigo-400 uppercase mb-2">Investor (45%)</p>
-                            <p id="share-investor" class="text-sm font-black text-indigo-700">Rp 0</p>
-                        </div>
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <p class="text-[9px] font-black text-slate-400 uppercase mb-2">Anda (55%)</p>
-                            <p id="share-pengelola" class="text-sm font-black text-slate-800">Rp 0</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Revenue Share Analytics (BARU - TANPA PENGELUARAN) -->
             <div class="bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm border-t-4 border-t-emerald-500">
                 <div class="flex items-center gap-2 mb-6">
@@ -145,6 +124,23 @@
                             <p class="text-[9px] font-black text-slate-400 uppercase mb-2">Anda (55%)</p>
                             <p id="share-pengelola-gross" class="text-sm font-black text-slate-800">Rp 0</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Share Analytics (LAMA - BERSIH) -->
+            <div class="bg-white p-6 rounded-[28px] border border-slate-100 shadow-sm opacity-80">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-2 bg-indigo-50 rounded-xl"><i data-lucide="trending-up" class="w-4 h-4 text-indigo-600"></i></div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800">Analisis Laba Bersih</h3>
+                        <p class="text-[10px] text-slate-400 font-bold italic">Sudah Dikurangi Pengeluaran</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end border-b border-slate-50 pb-4">
+                        <span class="text-xs font-bold text-slate-400 italic">Total Laba Bersih</span>
+                        <span id="laba-bersih" class="text-2xl font-black text-slate-900">Rp 0</span>
                     </div>
                 </div>
             </div>
@@ -241,8 +237,9 @@
     </div>
 
     <script>
+        // GANTI URL INI dengan Deployment ID Web App kamu yang baru
         const API_URL = "https://script.google.com/macros/s/AKfycbySwelg-1anKonhF2SkghQrRp1X84AVNGqJJqrl6YsKkOwAvArhppb5ssPPw3FqUvmp8g/exec"; 
-        const apiKey = ""; 
+        const apiKey = ""; // API Key untuk AI (Gemini)
 
         let appData = { transaksi: [], modal: [], pengeluaran: [] };
         let charts = {};
@@ -257,10 +254,14 @@
 
         async function fetchData() {
             try {
+                // Fetch GET biasanya aman, tapi tetap perlu handle error
                 const response = await fetch(`${API_URL}?action=getData`);
+                if (!response.ok) throw new Error('Network response was not ok');
                 appData = await response.json();
                 refreshUI();
             } catch (e) {
+                console.warn("Menggunakan Mock Data karena fetch gagal:", e);
+                // Jika gagal fetch, pakai data dummy sementara
                 mockData();
                 refreshUI();
             }
@@ -270,8 +271,7 @@
             const today = new Date().toISOString().split('T')[0];
             appData = {
                 transaksi: [
-                    { Tanggal: today, Kategori: 'Pulsa', "Nama Barang": 'Tsel 10k', Laba: 2000, "Harga Jual": 12000, Modal: 10000 },
-                    { Tanggal: today, Kategori: 'Aksesoris', "Nama Barang": 'Charger Ori', Laba: 45000, "Harga Jual": 125000, Modal: 80000 }
+                    { Tanggal: today, Kategori: 'Pulsa', "Nama Barang": 'Tsel 10k', Jumlah: 1, Laba: 2000, "Harga Jual": 12000, Modal: 10000 },
                 ],
                 modal: [{ Tanggal: today, Sumber: 'Investor Utama', Jumlah: 5000000, Alokasi: 'Stok Toko' }],
                 pengeluaran: [{ Tanggal: today, Kategori: 'Stok Barang', Jumlah: 1500000, Keterangan: 'Belanja perdana' }]
@@ -282,6 +282,8 @@
             const s = document.getElementById('filter-start').value;
             const e = document.getElementById('filter-end').value;
             const filterFn = (i) => {
+                // Pastikan format tanggal aman
+                if(!i.Tanggal) return false;
                 const d = new Date(i.Tanggal).toISOString().split('T')[0];
                 return d >= s && d <= e;
             };
@@ -295,37 +297,39 @@
         function refreshUI() {
             const data = getFilteredData();
             
-            // Logika Kas Global (Real-time di tangan)
+            // Logika Kas Global
             const totalGlobalInvest = appData.modal.reduce((a, b) => a + Number(b.Jumlah || 0), 0);
             const totalGlobalSales = appData.transaksi.reduce((a, b) => a + Number(b['Harga Jual'] || 0), 0);
             const totalGlobalExp = appData.pengeluaran.reduce((a, b) => a + Number(b.Jumlah || 0), 0);
             
-            // Rumus: (Modal + Jual) - Keluar
             const sisaKas = (totalGlobalInvest + totalGlobalSales) - totalGlobalExp;
 
-            // Stats Filtered (Dasar Bagi Hasil)
+            // Stats Filtered
             const labaKotor = data.transaksi.reduce((a, b) => a + Number(b.Laba || 0), 0);
             const expFilter = data.pengeluaran.reduce((a, b) => a + Number(b.Jumlah || 0), 0);
             const labaBersih = labaKotor - expFilter;
 
-            // Update UI - Analisis Bagi Hasil LAMA (Bersih)
-            document.getElementById('sisa-kas').innerText = formatIDR(sisaKas);
-            document.getElementById('total-invest').innerText = formatIDR(totalGlobalInvest);
-            document.getElementById('total-omzet-global').innerText = formatIDR(totalGlobalSales);
-            document.getElementById('laba-bersih').innerText = formatIDR(labaBersih);
-            document.getElementById('share-investor').innerText = formatIDR(labaBersih > 0 ? labaBersih * 0.45 : 0);
-            document.getElementById('share-pengelola').innerText = formatIDR(labaBersih > 0 ? labaBersih * 0.55 : 0);
-
-            // Update UI - Analisis Profit BARU (Tanpa Pengeluaran)
-            document.getElementById('laba-kotor-only').innerText = formatIDR(labaKotor);
-            document.getElementById('share-investor-gross').innerText = formatIDR(labaKotor > 0 ? labaKotor * 0.45 : 0);
-            document.getElementById('share-pengelola-gross').innerText = formatIDR(labaKotor > 0 ? labaKotor * 0.55 : 0);
+            // Update UI Elements
+            setText('sisa-kas', formatIDR(sisaKas));
+            setText('total-invest', formatIDR(totalGlobalInvest));
+            setText('total-omzet-global', formatIDR(totalGlobalSales));
+            setText('laba-bersih', formatIDR(labaBersih));
+            
+            // Pembagian
+            setText('laba-kotor-only', formatIDR(labaKotor));
+            setText('share-investor-gross', formatIDR(labaKotor > 0 ? labaKotor * 0.45 : 0));
+            setText('share-pengelola-gross', formatIDR(labaKotor > 0 ? labaKotor * 0.55 : 0));
 
             renderCharts(data);
             renderTransactions(data);
             renderExpenses(data);
             renderModalList();
             updateCalendar();
+        }
+
+        function setText(id, val) {
+            const el = document.getElementById(id);
+            if(el) el.innerText = val;
         }
 
         function renderCharts(data) {
@@ -368,17 +372,17 @@
                 list.innerHTML += `
                     <div class="bg-white p-5 rounded-[28px] border border-slate-100 flex justify-between items-center shadow-sm">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-indigo-600 font-black text-xs border border-slate-100">${t.Kategori[0]}</div>
+                            <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-indigo-600 font-black text-xs border border-slate-100">${(t.Kategori || 'U')[0]}</div>
                             <div>
-                                <p class="font-black text-sm text-slate-900">${t['Nama Barang']}</p>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${t.Kategori} • ${new Date(t.Tanggal).toLocaleDateString()}</p>
+                                <p class="font-black text-sm text-slate-900">${t['Nama Barang'] || 'Item'}</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${t.Kategori} • ${t.Jumlah || 1} Pcs</p>
                             </div>
                         </div>
                         <p class="text-emerald-600 font-black text-sm tracking-tighter">+${formatIDR(t.Laba)}</p>
                     </div>
                 `;
             });
-            lucide.createIcons();
+            lucide.createIcons(); // Re-init icons
         }
 
         function renderExpenses(data) {
@@ -419,12 +423,60 @@
 
         function toggleQuickMenu() { document.getElementById('quick-menu').classList.toggle('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function formatIDR(n) { return 'Rp ' + Math.floor(n).toLocaleString('id-ID'); }
+        function formatIDR(n) { return 'Rp ' + Math.floor(n || 0).toLocaleString('id-ID'); }
+        
         function resetFilter() {
             const n = new Date();
-            document.getElementById('filter-start').value = new Date(n.getFullYear(), n.getMonth(), 1).toISOString().split('T')[0];
-            document.getElementById('filter-end').value = new Date(n.getFullYear(), n.getMonth() + 1, 0).toISOString().split('T')[0];
+            // Default filter bulan ini
+            const start = new Date(n.getFullYear(), n.getMonth(), 1);
+            const end = new Date(n.getFullYear(), n.getMonth() + 1, 0);
+            
+            // Adjust timezone offset agar tidak mundur hari
+            const offset = start.getTimezoneOffset() * 60000;
+            document.getElementById('filter-start').value = new Date(start.getTime() - offset).toISOString().split('T')[0];
+            document.getElementById('filter-end').value = new Date(end.getTime() - offset).toISOString().split('T')[0];
             refreshUI();
+        }
+
+        // ======================= FUNGSI SIMPAN DATA (CORE) =======================
+        async function saveData(action, payload) {
+            const btn = document.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerText = "MENYIMPAN...";
+            btn.disabled = true;
+
+            try {
+                // PENTING: Header 'text/plain' mencegah CORS Preflight
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { "Content-Type": "text/plain" }, 
+                    body: JSON.stringify({ action: action, payload: payload })
+                });
+                
+                // Cek respon text karena GAS sering redirect
+                const txt = await res.text();
+                // Jika respon mengandung "status":"success", berarti berhasil
+                if(txt.includes("success")) {
+                    showStatus("Data Tersimpan!");
+                } else {
+                    console.error("Server Response:", txt);
+                    alert("Gagal simpan ke server. Cek koneksi.");
+                }
+
+            } catch (e) {
+                console.error("Save Error:", e);
+                alert("Error Koneksi: Data mungkin tidak tersimpan di server.");
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function showStatus(msg) {
+            const el = document.getElementById('sync-status');
+            el.innerText = msg;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3000);
         }
 
         function openModal(type) {
@@ -432,6 +484,7 @@
             const content = document.getElementById('modal-content');
             container.classList.remove('hidden');
             let html = '';
+            
             if (type === 'modal-transaksi') {
                 html = `
                     <h2 class="text-2xl font-black text-slate-900 italic mb-8 uppercase tracking-tighter">Input Penjualan Baru</h2>
@@ -441,6 +494,10 @@
                             <option>Pulsa</option><option>Paket Data</option><option>Aksesoris</option><option>Service</option><option value="Lainnya">Lainnya...</option>
                         </select>
                         <div id="input-kategori-manual" class="hidden"><input type="text" id="kategori-manual" placeholder="Sebutkan Kategori Baru..." class="w-full p-5 bg-indigo-50 border border-indigo-100 rounded-2xl text-sm font-bold"></div>
+                        
+                        <!-- NEW INPUT: JUMLAH -->
+                        <input type="number" name="jumlah" value="1" placeholder="JUMLAH (QTY)" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
+                        
                         <div class="grid grid-cols-2 gap-4">
                             <input type="number" name="modal" placeholder="MODAL (Rp)" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
                             <input type="number" name="jual" placeholder="JUAL (Rp)" class="w-full p-5 bg-slate-50 border-none rounded-2xl text-sm font-bold" required>
@@ -463,22 +520,34 @@
             }
             content.innerHTML = html + `<button onclick="closeModal('modal-container')" class="w-full mt-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">Tutup Jendela</button>`;
             
+            // ATTACH HANDLERS
             const transForm = document.getElementById('form-transaksi');
             if(transForm) transForm.onsubmit = async (e) => {
                 e.preventDefault();
                 const p = Object.fromEntries(new FormData(e.target));
                 if(p.kategori === 'Lainnya') p.kategori = document.getElementById('kategori-manual').value;
-                appData.transaksi.push({ Tanggal: new Date().toISOString().split('T')[0], ...p, Laba: p.jual - p.modal });
-                refreshUI(); closeModal('modal-container');
-                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addTransaction', payload: p }) });
+                
+                // Optimistic Update
+                appData.transaksi.push({ Tanggal: new Date().toISOString(), ...p, Laba: p.jual - p.modal });
+                refreshUI(); 
+                closeModal('modal-container');
+                
+                // Send to Server
+                await saveData('addTransaction', p);
             };
+
             const expForm = document.getElementById('form-expense');
             if(expForm) expForm.onsubmit = async (e) => {
                 e.preventDefault();
                 const p = Object.fromEntries(new FormData(e.target));
-                appData.pengeluaran.push({ Tanggal: new Date().toISOString().split('T')[0], ...p });
-                refreshUI(); closeModal('modal-container');
-                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'addExpense', payload: p }) });
+                
+                // Optimistic Update
+                appData.pengeluaran.push({ Tanggal: new Date().toISOString(), ...p });
+                refreshUI(); 
+                closeModal('modal-container');
+                
+                // Send to Server
+                await saveData('addExpense', p);
             };
         }
 
@@ -491,15 +560,17 @@
             });
             document.getElementById('section-' + tab).classList.remove('hidden');
             document.getElementById('tab-' + tab).className = 'pb-3 text-xs whitespace-nowrap tab-active';
-            if(tab === 'kalender') calendar.updateSize();
+            if(tab === 'kalender' && calendar) calendar.updateSize();
         }
 
         document.getElementById('ai-analyze-btn').onclick = async () => {
             const p = document.getElementById('ai-panel'); p.classList.remove('hidden');
-            const c = document.getElementById('ai-content'); c.innerHTML = "Menganalisis performa bisnis RAFAH SUKSES...";
+            const c = document.getElementById('ai-content'); c.innerHTML = '<div class="flex justify-center py-10"><div class="loader"></div></div>';
+            
             const data = getFilteredData();
             const laba = data.transaksi.reduce((a,b)=>a+Number(b.Laba),0);
             const prompt = `Analisis performa konter RAFAH SUKSES. Laba saat ini: ${formatIDR(laba)}. Berikan 3 poin strategi promosi singkat agar omzet naik signifikan besok pagi. Gunakan Bahasa Indonesia yang sangat profesional dan memotivasi pengelola.`;
+            
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -507,7 +578,7 @@
                 });
                 const r = await res.json();
                 c.innerHTML = (r.candidates?.[0]?.content?.parts?.[0]?.text || "Layanan AI sibuk.").replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-900 font-black">$1</b>');
-            } catch (e) { c.innerHTML = "Gagal memuat analisis AI."; }
+            } catch (e) { c.innerHTML = "Gagal memuat analisis AI. Pastikan API Key terisi."; }
         };
 
         function initCalendar() {
@@ -519,9 +590,11 @@
         }
 
         function updateCalendar() {
+            if(!calendar) return;
             const ev = [...appData.transaksi.map(t => ({ title: `+${formatIDR(t.Laba)}`, start: t.Tanggal, color: '#10b981' })),
                         ...appData.pengeluaran.map(e => ({ title: `-${formatIDR(e.jumlah)}`, start: e.Tanggal, color: '#ef4444' }))];
-            calendar.removeAllEvents(); calendar.addEventSource(ev);
+            calendar.removeAllEvents(); 
+            calendar.addEventSource(ev);
         }
     </script>
 </body>
